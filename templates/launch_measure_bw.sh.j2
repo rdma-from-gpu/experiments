@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -x
+
+# Setup the environment
+cd {{ test_dir }}
+
+echo "$$" >> launch_measure_bw.pid
+
+unbuffer python3 {{ playbook_dir }}/../helpers/measure_bw.py \
+  --interval 1 \
+  --port {{ hostvars[inventory_hostname]['vars']['switch_port'] }} \
+  --outdir . \
+  --name {{ inventory_hostname }}\
+  --npf \
+  | tee ./bw_{{ hostvars[inventory_hostname]['vars']['switch_port'] }}.stdout
+
+

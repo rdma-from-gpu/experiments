@@ -1,8 +1,14 @@
 #!/bin/bash
 
+echo "RESULT-STARTTIME ${EPOCHREALTIME}"
+set -x
+
 # Setup the environment
 PATH="{{ playbook_dir }}/../apps/build:$PATH"
 cd {{ test_dir }}
+
+echo "$$" >> launch_generator.pid
+
 
 CUDA_VISIBLE_DEVICES={{hostvars['worker']['vars']['gpu_id']}}
 generator \
@@ -20,3 +26,5 @@ generator \
   --sleep {{SLEEP}} \
   --max-rate {{MAX_RATE}} \
   | tee ./generator.stdout
+
+echo "RESULT-STOPTIME ${EPOCHREALTIME}"

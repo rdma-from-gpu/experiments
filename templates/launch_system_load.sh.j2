@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -x
+
+# Setup the environment
+cd {{ test_dir }}
+
+echo "$$" >> launch_measure_system_load.pid
+
+unbuffer python3 {{ playbook_dir }}/../helpers/system_load.py \
+  --name "{{ inventory_hostname }}" \
+  --load \
+  --interrupts \
+  --cores {{ hostvars[inventory_hostname]['vars']['gpu_cores']  }} \
+  --power \
+  | tee system_load.stdout
