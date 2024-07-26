@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Setup the environment
+PATH="{{ playbook_dir }}/../apps/build:$PATH"
+cd {{ test_dir }}
+
+CUDA_VISIBLE_DEVICES={{hostvars['worker']['vars']['gpu_id']}}
+generator \
+--number {{NUMBER}} \
+  --buffer-location {{BUFFER_LOCATION}} \
+  --driver-location {{DATA_LOCATION}} \
+  --mode {{MODE}} \
+  --consume-cqe {{MODE}} \
+  --batch {{BATCH}} \
+  --write-size {{WRITE_SIZE}} \
+  --remote-address {{ hostvars['worker']['vars']['remote_addr']}} \
+  --local-address {{ hostvars['worker']['vars']['local_addr']}} \
+  --gpu-batch {{GPU_BATCH}} \
+  --quiet {{QUIET}} \
+  --sleep {{SLEEP}} \
+  --max-rate {{MAX_RATE}} \
+  | tee ./generator.stdout

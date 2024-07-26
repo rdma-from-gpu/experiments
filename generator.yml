@@ -1,0 +1,42 @@
+---
+- hosts: all
+  gather_facts: false
+  vars_files:
+    - ./vars/generator.yml
+  tasks:
+  - name: "Collect time"
+    set_fact:
+      test_dir: "{{ playbook_dir }}/tmp/{{ lookup('pipe','date --iso-8601=seconds') }}"
+ 
+  - name: "ensures {{ test_dir }} exists"
+    file:
+      path: "{{ test_dir }}"
+      state: directory
+
+  - name: Create launch script
+    template:
+      src: templates/launch_generator.sh.j2
+      dest: "{{ test_dir }}/launch_generator.sh"
+      mode: 0777
+
+  - name: Run the generator
+    block:
+      - name: launch_generator
+        register: launch_generator
+        become: true
+        command: "{{ test_dir }}/launch_generator.sh"
+
+    always:
+      - name: save logs
+        delegate_to: localhost
+        become: no
+        copy:
+          dest: "{{ test_dir }}/launch_generator.log"
+          content: "==== stdout ====\n{{launch_generator.stdout}}\n==== stderr ====\n{{launch_generator.stdout}}\n"
+          mode: 0664
+      - name: show stdout
+        debug:
+          var: launch_generator.stdout
+      # - name: show stderr
+      #   debug:
+      #     var: launch_generator.stderr
