@@ -1,6 +1,7 @@
 #!/bin/bash
 
-echo "RESULT-STARTTIME ${EPOCHREALTIME}"
+echo "RESULT-STARTTIME ${EPOCHREALTIME}" | tee generator.stdout
+
 set -x
 
 # Setup the environment
@@ -11,6 +12,7 @@ echo "$$" >> launch_generator.pid
 
 
 CUDA_VISIBLE_DEVICES={{hostvars['worker']['vars']['gpu_id']}}
+timeout --signal=2 ${{TIMEOUT}} \
 generator \
 --number {{NUMBER}} \
   --buffer-location {{BUFFER_LOCATION}} \
@@ -25,6 +27,6 @@ generator \
   --quiet {{QUIET}} \
   --sleep {{SLEEP}} \
   --max-rate {{MAX_RATE}} \
-  | tee ./generator.stdout
+  | tee -a generator.stdout
 
-echo "RESULT-STOPTIME ${EPOCHREALTIME}"
+echo "RESULT-STOPTIME ${EPOCHREALTIME}" | tee -a generator.stdout

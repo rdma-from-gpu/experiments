@@ -13,6 +13,7 @@ unbuffer python3 {{ playbook_dir }}/../helpers/measure_bw.py \
   --outdir . \
   --name {{ inventory_hostname }}\
   --npf \
+  --epoch \
   | tee ./bw_{{ hostvars[inventory_hostname]['vars']['switch_port'] }}.stdout
 
 

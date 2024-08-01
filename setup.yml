@@ -1,0 +1,20 @@
+---
+- hosts: all
+  tasks:
+  - name: Collect ansible_facts to discover internal IPs
+    debug:
+      msg: Discovering internal IP...
+  - debug: var=ansible_all_ipv4_addresses
+  - debug: var=ansible_default_ipv4.address
+
+- hosts: all
+  tasks:
+  - name: Add the nvidia_peermem module
+    community.general.modprobe:
+      name: nvidia_peermem
+      state: present
+  - name: Add the mlx5_core module
+    community.general.modprobe:
+      name: mlx5_core
+      state: present
+

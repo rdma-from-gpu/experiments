@@ -1,0 +1,20 @@
+---
+- hosts: worker
+  gather_facts: false
+
+  vars_files:
+    - ./vars/generator.yml
+
+  tasks:
+    - name: test
+      debug:
+        msg: "TEST"
+    - name: "Launching test for mode {{ MODE }}"
+      include_tasks: tasks/generator_pktsize.yml
+      loop:
+        - standard
+        - crafted
+        - gpu
+      loop_control:
+        loop_var: MODE
+

@@ -6,7 +6,6 @@ from pathlib import Path
 import re
 import pandas as pd
 import traceback
-import hickle as hkl
 import argparse
 
 test_sh_re=r".*/(?P<test_name>[^/]*)/(?P<run>[^/]*)/test.sh"
@@ -26,12 +25,12 @@ def find_tests(path):
 
 def new_data(t):
     # Check whether there are new results
-    hickle_file = Path(t["full_path"])/"results.hickle"
-    if not os.path.exists(hickle_file):
+    h5_file = Path(t["full_path"])/"results.h5"
+    if not os.path.exists(h5_file):
         return True
-    hickle_date = os.path.getmtime(hickle_file)
+    h5_date = os.path.getmtime(h5_file)
     latest_file = max([os.path.getmtime(f) for f in  glob.glob(f"{t['full_path']}/*")])
-    if hickle_date < latest_file:
+    if h5_date < latest_file:
         return True
     else:
         return False
@@ -75,6 +74,8 @@ def parse_stdout(f):
                 print("Error while parsing line", l,":")
                 traceback.print_exc()
 
+    print(results)
+    print(kind_results)
     return results, kind_results
 
 def infere_timestamp_div(ts):
@@ -86,6 +87,8 @@ def infere_timestamp_div(ts):
         div = 1e9
     elif lts > 12: # ms
         div = 1e3
+    else: # It's already in seconds (hopefully)
+        return 1
     return div
 
 def change_precision(df, div=1, time_precision=1):
@@ -96,13 +99,17 @@ def change_precision(df, div=1, time_precision=1):
 
 
 
-def generate_hickle(t, time_precision=1):
-    # Generate a run-specific hickle file. Joined later
+def generate_h5(t, time_precision=1):
+    # Generate a run-specific h5 file. Joined later
+    all_results = []
+    all_kind_results = {}
     for f in glob.glob(f"{t['full_path']}/*.stdout"):
         results, kind_results = parse_stdout(f)
         results_df = pd.Series(results)
+        all_results.append(results_df)
+        # keys = keys.union(kind_results.keys())
+        # results_store.put("results",results_df)
 
-        hkl.dump(results, f"{t[r'full_path']}/results.hickle")
         for k, this_kr in kind_results.items():
             this_kr_df = pd.DataFrame(this_kr)
             first, last = this_kr_df.index[[0,-1]]
@@ -112,10 +119,20 @@ def generate_hickle(t, time_precision=1):
                 print("Warning: the preicision for",k, "it's not consistent:", div, div_last, "assuming", div)
 
             this_kr_df.index = change_precision(this_kr_df, div, time_precision)
-            from IPython import embed
-            embed()
+            all_kind_results.setdefault(k, [])
+            all_kind_results[k].append(this_kr_df)
 
 
+    all_results = pd.concat(all_results)
+    all_kind_results = {k:pd.concat(r) for k,r in all_kind_results.items()}
+    results_store = pd.HDFStore(f"{t[r'full_path']}/results.h5","w")
+    results_store.put("results", all_results)
+    results_store.put("keys", pd.Series(all_kind_results.keys()))
+    for k, r in all_kind_results.items():
+        results_store.put(k, r)
+
+    print(results_store.info())
+    results_store.close()
 
     return
 
@@ -128,8 +145,8 @@ if __name__ == "__main__":
     results_path = os.path.abspath(Path(file_path)/ "results")
 
     parser = argparse.ArgumentParser(
-                    description='Look for results, and convert them to hickle')
-    parser.add_argument("--force", action="store_true", help="Ignore last-modified date, always re-generate hickle files")
+                    description='Look for results, and convert them to h5')
+    parser.add_argument("--force", action="store_true", help="Ignore last-modified date, always re-generate h5 files")
     parser.add_argument("--time-precision", type=int, help="Time precision to round results. If more results fall in the same 'slot', only average will be kept. Express it in fraction of seconds (e.g. 1 for 1 sample/sec, 10 for 10 samples/sec.. ", default=1)
     parser.add_argument("--path", default=str(results_path),
                         help="Where to look for results")
@@ -143,8 +160,8 @@ if __name__ == "__main__":
 
     for t in tests:
         if args.force or new_data(t):
-            print("Generating hickle file for", t["full_path"])
-            generate_hickle(t, args.time_precision)
+            print("Processing results for", t["full_path"])
+            generate_h5(t, args.time_precision)
         else:
             print("Skipping", t["full_path"])
 

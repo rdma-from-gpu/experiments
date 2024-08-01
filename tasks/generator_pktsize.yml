@@ -1,0 +1,14 @@
+---
+- name: "Launching test for WRITE_SIZE {{ WRITE_SIZE }}"
+  include_tasks: tasks/generator_tasks.yml
+  loop:
+    - 1000
+    - 2000
+    - 3000
+    - 10000
+    - 15000
+    - 20000
+    - 30000
+  loop_control:
+    loop_var: WRITE_SIZE
+
