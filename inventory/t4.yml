@@ -7,7 +7,7 @@ all:
         local_iface: cx5if0
         remote_iface: cx5if1
         local_addr: 192.168.127.0
-        remote_addr: 192.168.127.1
+        remote_addr: 192.168.134.1
         gpu_id: 0
         switch_port: 25
         gpu_cores: "0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30"

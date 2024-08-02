@@ -309,7 +309,7 @@ def format_pktsize_plot(ax, xlabel="Payload Size (B)", div = 1):
     ax.set_xlabel(xlabel)
     ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/div))
     ax.tick_params(axis="x",direction="in")
-    ax.grid(which="major", axis="x")
+    #ax.grid(which="major", axis="x")
     ax.xaxis.set_major_formatter(ticks_x)
 
 def format_time_plot(ax, ylabel="Application time", div=1, log=False):
@@ -319,3 +319,14 @@ def format_time_plot(ax, ylabel="Application time", div=1, log=False):
     ax.tick_params(axis="y",direction="in")
     if log:
         ax.set_yscale('log')
+
+def time_cutter(data, column, threshold, cut_start = 3, cut_end = 1):
+    data = data[data[column] >= threshold]
+    # def t_cutter(data):
+    #     first = min(data["TIME"]) + cut_start
+    #     last = max(data["TIME"]) - cut_end
+    #     data = data[first <= data["TIME"]]
+    #     data = data[data["TIME"] <= last]
+    #     return data
+    # data = data.groupby("run").apply(t_cutter)
+    return data

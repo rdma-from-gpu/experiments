@@ -23,6 +23,7 @@ parser.add_argument("--input", default=str(results_path_h5),
 parser.add_argument("--output", default=str(output_path),
                     help="Where to place plots")
 args = parser.parse_args()
+output_path = args.output
 
 with pd.HDFStore(args.input,"r") as store:
     results = store.get("results")
@@ -43,7 +44,7 @@ plt.rcParams['ps.fonttype'] = 42
 
 
 time_results = kind_results["TIME"]
-print(time_results)
+time_results = time_cutter(time_results, "RX_BPS_worker", 2000, 5, 1)
 
 fig, ax = errorbar_plotter(time_results, X="WRITE_SIZE", Y="TX_BPS_worker", SERIES="MODE", medians=False)
 format_bw_plot(ax)
@@ -64,7 +65,19 @@ fig.tight_layout()
 fig.savefig(output_path + "/generator_pktsize_mode_avg_send.pdf")
 
 
-
-# fig, ax = errorbar_plotter(time_results, X="WRITE_SIZE", Y="CPU_CORES_worker", SERIES="MODE", medians=False)
+fig, ax = errorbar_plotter(results, X="WRITE_SIZE", Y="RUNTIME", SERIES="MODE", medians=False)
 # format_bw_plot(ax)
-# fig.savefig(output_path + "/generator_pktsize_mode_cpu_cores.pdf")
+fig.savefig(output_path + "/generator_pktsize_mode_runtime.pdf")
+
+
+results["RUNTIME2"] = results["STOPTIME"] - results["STARTTIME"]
+fig, ax = errorbar_plotter(results, X="WRITE_SIZE", Y="RUNTIME2", SERIES="MODE", medians=False)
+fig.savefig(output_path + "/generator_pktsize_mode_runtime2.pdf")
+
+# fig, ax = plt.subplots()
+
+# for g, gdata in time_results.groupby("run"):
+#     rtime = gdata["TIME"] - gdata["TIME"].iloc[0]
+#     ax.plot(rtime, gdata["RX_BPS_worker"])
+
+# fig.savefig(output_path + "/test.pdf")

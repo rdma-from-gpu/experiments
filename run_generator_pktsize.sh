@@ -19,5 +19,6 @@ done
 mv tmp/${TS}/* results/$TESTNAME/
 rm -rf tmp/${TS}
 
+cd plotters
 python3 collect_generator_pktsize.py --path ../results/generator_pktsize
 python3 plot_generator_pktsize.py --input ../results/generator_pktsize/results.h5 --output ../results/generator_pktsize/plots

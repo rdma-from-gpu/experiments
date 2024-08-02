@@ -4,7 +4,7 @@ all:
       ansible_host: nslrack34.nslab
       ansible_user: massimo
       vars:
-        local_iface: cx5if0
+        #local_iface: cx6_200if0
         #remote_iface: cx5if1
         local_addr: 192.168.134.0
         remote_addr: 192.168.127.1
