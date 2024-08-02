@@ -6,9 +6,10 @@
     - ./vars/generator.yml
 
   tasks:
-    - name: test
-      debug:
-        msg: "TEST"
+    - name: Get current test folder
+      ansible.builtin.set_fact:
+        this_test: "{{ lookup('env', 'TS') }}"
+      delegate_to: localhost
     - name: "Launching test for mode {{ MODE }}"
       include_tasks: tasks/generator_pktsize.yml
       loop:

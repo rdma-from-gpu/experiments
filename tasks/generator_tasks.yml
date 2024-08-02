@@ -1,7 +1,7 @@
 ---
 - name: "Collect time"
   set_fact:
-    test_dir: "{{ playbook_dir }}/tmp/{{ lookup('pipe','date --iso-8601=seconds') }}"
+    test_dir: "{{ playbook_dir }}/tmp/{{ this_test }}/{{ lookup('pipe','date --iso-8601=seconds') }}"
 
 - name: "ensures {{ test_dir }} exists"
   file:

@@ -12,7 +12,7 @@ echo "$$" >> launch_generator.pid
 
 
 CUDA_VISIBLE_DEVICES={{hostvars['worker']['vars']['gpu_id']}}
-timeout --signal=2 ${{TIMEOUT}} \
+timeout --signal=2 {{TIMEOUT}} \
 generator \
 --number {{NUMBER}} \
   --buffer-location {{BUFFER_LOCATION}} \

@@ -8,3 +8,4 @@ numpy>=1.26.4
 pytables=3.9.2>=py312hf20fedc_3
 hickle>=5.0.3
 anaconda::pytables >=3.9.2
+ansible>=10.0.0

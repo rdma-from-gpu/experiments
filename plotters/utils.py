@@ -7,6 +7,7 @@ import traceback
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.ticker as ticker
 
 
 test_sh_re=r".*/(?P<test_name>[^/]*)/(?P<run>[^/]*)/test.sh"
@@ -270,9 +271,19 @@ def errorbar_plotter(data, X, Y, SERIES, medians=False, means=True, legend_loc =
         # This is not "safe"  for cases when the index shouldn't be a number
         gdata[X] = gdata[X].astype("float")
         grouped = gdata.groupby(X, group_keys=False)
+        centrals = grouped[Y].apply("median" if medians else "mean")
         lows = grouped[Y].apply(low)
         highs = grouped[Y].apply(high)
-        centrals = grouped[Y].apply("median" if medians else "mean")
+
+        # The error bars need the differential values.
+        # But when the test fails, some of them could be negative
+        # So we cheat and set those to 0
+        # The experienced viewer should note the "0 error" and suspect the error
+        lows = centrals-lows
+        highs = highs - centrals
+        lows = [max(0,l) for l in lows]
+        highs= [max(0,h) for h in highs]
+
         x = centrals.keys()
 
         label = g[0] if type(g) is tuple else g
@@ -287,3 +298,24 @@ def errorbar_plotter(data, X, Y, SERIES, medians=False, means=True, legend_loc =
     ax.legend(loc=legend_loc)
     return fig, ax
 
+def format_bw_plot(ax, ylabel="Throughput (Gbps)", div=1e9):
+    ax.set_ylabel(ylabel)
+    ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/div))
+    ax.yaxis.set_major_formatter(ticks_y)
+    ax.tick_params(axis="y",direction="in")
+    ax.grid(which="major", axis="y")
+
+def format_pktsize_plot(ax, xlabel="Payload Size (B)", div = 1):
+    ax.set_xlabel(xlabel)
+    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/div))
+    ax.tick_params(axis="x",direction="in")
+    ax.grid(which="major", axis="x")
+    ax.xaxis.set_major_formatter(ticks_x)
+
+def format_time_plot(ax, ylabel="Application time", div=1, log=False):
+    ax.set_ylabel(ylabel)
+    ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/div))
+    ax.yaxis.set_major_formatter(ticks_y)
+    ax.tick_params(axis="y",direction="in")
+    if log:
+        ax.set_yscale('log')

@@ -1,5 +1,6 @@
 ---
 - hosts: all
+  strategy: free
   tasks:
   - name: Collect ansible_facts to discover internal IPs
     debug:
@@ -10,11 +11,42 @@
 - hosts: all
   tasks:
   - name: Add the nvidia_peermem module
+    become: true
     community.general.modprobe:
       name: nvidia_peermem
       state: present
+  # Just in case, this should be already lodaded
   - name: Add the mlx5_core module
+    become: true
     community.general.modprobe:
       name: mlx5_core
       state: present
+  - name: Disable swap
+    command: swapoff --all
+    become: true
+  - name: Set CPU governor
+    become: true
+    shell: |
+      MAX=$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq)
+      echo performance > /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+      cpupower frequency-set --max $MAX --min $MAX --governor performance
+  - name: Setup GPU
+    become: true
+    shell: |
+      nvidia-smi -i {{hostvars['worker']['vars']['gpu_id']}} --compute-mode 3
+      nvidia-smi -i {{hostvars['worker']['vars']['gpu_id']}} --auto-boost-default DISABLED
+      nvidia-smi -i {{hostvars['worker']['vars']['gpu_id']}} --persistence-mode 1
+      CLOCKS=$(nvidia-smi -i {{hostvars['worker']['vars']['gpu_id']}}  --query-supported-clocks=mem,gr --format=csv,noheader,nounits | head -n1)
+
+      MCLOCK=${CLOCKS%,*}
+      GCLOCK=${CLOCKS#*,}
+      nvidia-smi -i {{hostvars['worker']['vars']['gpu_id']}} --application-clocks=${CLOCKS}
+      nvidia-smi -i {{hostvars['worker']['vars']['gpu_id']}} --lock-gpu-clocks=${GCLOCK},${GCLOCK}
+      nvidia-smi -i {{hostvars['worker']['vars']['gpu_id']}} --lock-memory-clocks=${MCLOCK},${MCLOCK}
+
+
+
+
+
+
 
