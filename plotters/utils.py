@@ -317,16 +317,37 @@ def format_time_plot(ax, ylabel="Application time", div=1, log=False):
     ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/div))
     ax.yaxis.set_major_formatter(ticks_y)
     ax.tick_params(axis="y",direction="in")
+
+
+
     if log:
-        ax.set_yscale('log')
+
+        def timelabel(t):
+            if t == 10:
+                return "10 ns"
+            if t == 100:
+                return "100 ns"
+            if t == 1000:
+                return "1 µs"
+            return f"{t} ns"
+
+        ax.set_yscale("log")
+        ax.yaxis.set_major_formatter(lambda y, pos : timelabel(y))
+    ax.grid(which='major',linestyle='-',axis='y')
 
 def time_cutter(data, column, threshold, cut_start = 3, cut_end = 1):
     data = data[data[column] >= threshold]
-    # def t_cutter(data):
-    #     first = min(data["TIME"]) + cut_start
-    #     last = max(data["TIME"]) - cut_end
-    #     data = data[first <= data["TIME"]]
-    #     data = data[data["TIME"] <= last]
-    #     return data
-    # data = data.groupby("run").apply(t_cutter)
+    start = data.groupby("run")["TIME"].min()
+    stop = data.groupby("run")["TIME"].max()
+    start += cut_start
+    stop -= cut_end
+    # To keep things simple, we join on the "run", adding start and stop times
+    # And then filter on these.
+    data = data.join(start, on="run", how="left", rsuffix="_CUT_START")
+    data = data.join(stop, on="run", how="left", rsuffix="_CUT_STOP")
+    data = data[data["TIME"] > data["TIME_CUT_START"]]
+    data = data[data["TIME"] < data["TIME_CUT_STOP"]]
+    del data["TIME_CUT_START"]
+    del data["TIME_CUT_STOP"]
+
     return data

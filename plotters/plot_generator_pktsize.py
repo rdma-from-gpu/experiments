@@ -44,7 +44,12 @@ plt.rcParams['ps.fonttype'] = 42
 
 
 time_results = kind_results["TIME"]
-time_results = time_cutter(time_results, "RX_BPS_worker", 2000, 5, 1)
+# Remove edges and bad points (note threshold is 0=anything is good bw-wise)
+if "RX_BPS_worker" in time_results:
+    time_results = time_cutter(time_results, "RX_BPS_worker", 0, 3, 5)
+# Remove bad runs. This should not be needed
+if "AVG_SEND" in results.columns:
+    results = results[results["AVG_SEND"] < 10000000]
 
 fig, ax = errorbar_plotter(time_results, X="WRITE_SIZE", Y="TX_BPS_worker", SERIES="MODE", medians=False)
 format_bw_plot(ax)
@@ -58,26 +63,29 @@ format_pktsize_plot(ax)
 fig.tight_layout()
 fig.savefig(output_path + "/generator_pktsize_mode_rx_bps.pdf")
 
-fig, ax = errorbar_plotter(results, X="WRITE_SIZE", Y="AVG_SEND", SERIES="MODE", medians=False)
-format_time_plot(ax, ylabel="Application time to post a verb (ns)", div=1, log=False)
-format_pktsize_plot(ax)
-fig.tight_layout()
-fig.savefig(output_path + "/generator_pktsize_mode_avg_send.pdf")
 
 
-fig, ax = errorbar_plotter(results, X="WRITE_SIZE", Y="RUNTIME", SERIES="MODE", medians=False)
-# format_bw_plot(ax)
-fig.savefig(output_path + "/generator_pktsize_mode_runtime.pdf")
+
+# fig, ax = errorbar_plotter(results, X="WRITE_SIZE", Y="AVG_SEND", SERIES="MODE", medians=False)
+# format_time_plot(ax, ylabel="Application time to post a verb", div=1, log=True)
+# format_pktsize_plot(ax)
+# fig.tight_layout()
+# fig.savefig(output_path + "/generator_pktsize_mode_avg_send.pdf")
 
 
-results["RUNTIME2"] = results["STOPTIME"] - results["STARTTIME"]
-fig, ax = errorbar_plotter(results, X="WRITE_SIZE", Y="RUNTIME2", SERIES="MODE", medians=False)
-fig.savefig(output_path + "/generator_pktsize_mode_runtime2.pdf")
+# fig, ax = errorbar_plotter(results, X="WRITE_SIZE", Y="RUNTIME", SERIES="MODE", medians=False)
+# # format_bw_plot(ax)
+# fig.savefig(output_path + "/generator_pktsize_mode_runtime.pdf")
 
-# fig, ax = plt.subplots()
 
-# for g, gdata in time_results.groupby("run"):
-#     rtime = gdata["TIME"] - gdata["TIME"].iloc[0]
-#     ax.plot(rtime, gdata["RX_BPS_worker"])
+# results["RUNTIME2"] = results["STOPTIME"] - results["STARTTIME"]
+# fig, ax = errorbar_plotter(results, X="WRITE_SIZE", Y="RUNTIME2", SERIES="MODE", medians=False)
+# fig.savefig(output_path + "/generator_pktsize_mode_runtime2.pdf")
 
-# fig.savefig(output_path + "/test.pdf")
+fig, ax = plt.subplots()
+
+for g, gdata in time_results.groupby("run"):
+    rtime = gdata["TIME"] - gdata["TIME"].iloc[0]
+    ax.plot(rtime, gdata["RX_BPS_worker"])
+
+fig.savefig(output_path + "/debug-bw_time.pdf")

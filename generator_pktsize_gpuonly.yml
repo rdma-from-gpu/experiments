@@ -1,0 +1,19 @@
+---
+- hosts: worker
+  gather_facts: false
+
+  vars_files:
+    - ./vars/generator.yml
+
+  tasks:
+    - name: Get current test folder
+      ansible.builtin.set_fact:
+        this_test: "{{ lookup('env', 'TS') }}"
+      delegate_to: localhost
+    - name: "Launching test for mode {{ MODE }}"
+      include_tasks: tasks/generator_pktsize.yml
+      loop:
+        - gpu
+      loop_control:
+        loop_var: MODE
+
