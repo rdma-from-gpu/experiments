@@ -1,9 +1,10 @@
 ---
-NUMBER: 40000000
-WRITE_SIZE: 4000
+# These are variables that generally don't change
+NUMBER: 4000000
+  #WRITE_SIZE: 4000 
 MODE: standard
-BATCH: 500
-GPU_BATCH: 1
+BATCH: 4000
+GPU_BATCH: 4000
 #BASE_CORE: 20
 #CORES: 2
 QUIET: 1
@@ -15,4 +16,3 @@ TIMEOUT: 45
 #LOCAL_ADDRESS: 192.168.127.0
 BUFFER_LOCATION: cudaMalloc
 DATA_LOCATION: cudaMallocManaged
-

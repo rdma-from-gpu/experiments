@@ -9,5 +9,6 @@ echo "$$" >> launch_nvidia_stas.pid
 
 export CUDA_DEVICE={{ hostvars[inventory_hostname]['vars']['gpu_id']  }}
 
+timeout 180 \
 bash {{ playbook_dir }}/../helpers/nvidia_stats.sh \
   | tee nvidia_stats.stdout

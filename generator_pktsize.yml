@@ -2,6 +2,11 @@
 - hosts: worker
   gather_facts: false
 
+  vars:
+    # - BATCH: 512
+    # - GPU_BATCH: 4096
+    # - MODES: 
+    #     - standard
   vars_files:
     - ./vars/generator.yml
 
@@ -12,10 +17,7 @@
       delegate_to: localhost
     - name: "Launching test for mode {{ MODE }}"
       include_tasks: tasks/generator_pktsize.yml
-      loop:
-        - standard
-        - crafted
-        - gpu
+      loop: "{{ MODES }}"
       loop_control:
         loop_var: MODE
 

@@ -15,13 +15,23 @@ result_re=r"^((?P<KIND>[^\d][^-]*)-)?((?P<TIME>[\d\.]*)-)?RESULT(-(?P<RESULT>[^ 
 
 
 
-def find_tests(path):
+def find_tests(path, multi=False):
     # We use test.sh as sentinel to identify a good run
-    g = glob.glob(f"{path}/*/test.sh")
+    if multi:
+        g = glob.glob(f"{path}*/*/test.sh")
+    else:
+        g = glob.glob(f"{path}/*/test.sh")
     tests = []
     for t in g:
         r=re.match(test_sh_re, t).groupdict()
         r["full_path"] = os.path.abspath(os.path.dirname(t))
+        # We save the last part (which should be a100, l40, cpu)
+        if "_" in r["test_name"]:
+            r["testname"] = r["test_name"].split("_")[-1]
+        else:
+            r["testname"] = r["test_name"]
+
+
         tests.append(r)
 
     return tests
@@ -179,7 +189,7 @@ def generate_h5(t, time_precision=1, variables = {}):
             div = infere_timestamp_div(first)
             div_last = infere_timestamp_div(last)
             if div != div_last:
-                print("Warning: the preicision for",k, "it's not consistent:", div, div_last, "assuming", div)
+                print("Warning: the precision for",k, "it's not consistent:", div, div_last, "assuming", div)
 
             this_kr_df.index = change_precision(this_kr_df, div, time_precision)
             #this_kr_df = this_kr_df.groupby(this_kr_df.index).mean().reset_index()
@@ -188,6 +198,7 @@ def generate_h5(t, time_precision=1, variables = {}):
 
     run_variables = extract_variables(t["full_path"], variables)
     run_variables["run"] = str(Path(t["full_path"]).name)
+    run_variables["testname"] = str(Path(t["testname"]))
     #run_variables_df = pd.Series(run_variables)
 
 
@@ -241,6 +252,7 @@ def read_h5(path):
 def join_results(results, kind_results):
     all_results = pd.concat(results)
     all_kr = {}
+
     for kr in kind_results:
         for k, r in kr.items():
             all_kr.setdefault(k, [])
@@ -253,7 +265,7 @@ def join_results(results, kind_results):
 
 
 
-def errorbar_plotter(data, X, Y, SERIES, medians=False, means=True, legend_loc = "lower right"):
+def errorbar_plotter(data, X, Y, SERIES, medians=False, means=True, legend_loc = "lower right", point_labels=False):
 
     def low(data):
         return data.quantile(.1)
@@ -295,7 +307,11 @@ def errorbar_plotter(data, X, Y, SERIES, medians=False, means=True, legend_loc =
                       capsize=3,
                       markersize=7)
 
-    ax.legend(loc=legend_loc)
+
+        if point_labels:
+            for xx,yy in zip(x, centrals):
+                ax.text(xx,yy,int(xx/1000), fontsize=5)
+    ax.legend()
     return fig, ax
 
 def format_bw_plot(ax, ylabel="Throughput (Gbps)", div=1e9):
@@ -312,16 +328,12 @@ def format_pktsize_plot(ax, xlabel="Payload Size (B)", div = 1):
     #ax.grid(which="major", axis="x")
     ax.xaxis.set_major_formatter(ticks_x)
 
-def format_time_plot(ax, ylabel="Application time", div=1, log=False):
+def format_time_plot(ax, ylabel="Application time", div=1, log=False, start =0, stop=1e3):
     ax.set_ylabel(ylabel)
     ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/div))
-    ax.yaxis.set_major_formatter(ticks_y)
     ax.tick_params(axis="y",direction="in")
 
-
-
     if log:
-
         def timelabel(t):
             if t == 10:
                 return "10 ns"
@@ -329,10 +341,17 @@ def format_time_plot(ax, ylabel="Application time", div=1, log=False):
                 return "100 ns"
             if t == 1000:
                 return "1 µs"
-            return f"{t} ns"
+            if t == 10000:
+                return "10 us"
+            if t == 100000:
+                return "100 us"
+            return f"{int(t)} ns"
 
         ax.set_yscale("log")
         ax.yaxis.set_major_formatter(lambda y, pos : timelabel(y))
+    else:
+        ax.yaxis.set_major_formatter(ticks_y)
+    ax.set_ylim(start, stop)
     ax.grid(which='major',linestyle='-',axis='y')
 
 def time_cutter(data, column, threshold, cut_start = 3, cut_end = 1):
@@ -351,3 +370,18 @@ def time_cutter(data, column, threshold, cut_start = 3, cut_end = 1):
     del data["TIME_CUT_STOP"]
 
     return data
+
+
+# This is a simple attempt to retrieve test name without a regexp (sigh)
+def parse_testname(path, base):
+    # if base:
+    #     if "*" in base:
+    #         base = base.replace("*", "")
+    #     path = path.replace(base, "")
+    #     path = path.split("/")[0]
+    #     while path.startswith("_"):
+    #         path = path[1:]
+    #     return path
+    # else:
+    #     return path.split("/"
+    return path

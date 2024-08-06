@@ -7,6 +7,9 @@ cd {{ test_dir }}
 
 echo "$$" >> launch_measure_bw.pid
 
+# We set a timeout so a failed ansible run would not survive forever
+
+timeout 180 \
 unbuffer python3 {{ playbook_dir }}/../helpers/measure_bw.py \
   --interval 1 \
   --port {{ hostvars[inventory_hostname]['vars']['switch_port'] }} \

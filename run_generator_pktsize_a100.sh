@@ -8,7 +8,8 @@ export TS=$(date --iso-8601=seconds)
 mkdir -p ./tmp/${TS}
 #rm -rf ./tmp/${TS}/*
 
-ansible-playbook -i ./inventory/a100.yml ./generator_pktsize_gpuonly.yml $@
+ansible-playbook -i ./inventory/a100.yml ./generator_pktsize.yml \
+  --extra-vars '{"MODES":["gpu"], "BATCH":512, "GPU_BATCH":4096}' $@
 
 for f in tmp/${TS}/*; do
   cp generator_pktsize.yml $f
