@@ -1,0 +1,31 @@
+#!/bin/bash
+
+echo "RESULT-STARTTIME ${EPOCHREALTIME}" | tee client.stdout
+
+set -x
+
+# Setup the environment
+PATH="{{ playbook_dir }}/../apps/build:$PATH"
+cd {{ test_dir }}
+
+echo "$$" >> launch_client.pid
+
+
+client  \
+    --local {{ hostvars['client']['vars']['local_addr']}} \
+    --address {{ hostvars['worker']['vars']['local_addr']}} \
+    --slots {{SLOTS}} \
+    --repeat {{REPEAT}} \
+    --batch {{CLIENT_BATCH}} \
+    --rc {{RC}} \
+    --buffer {{BUFFER_SIZE}} \
+    --timeout {{CLIENT_TIMEOUT}} \
+    --outstanding {{OUTSTANDING}} \
+    --max-runtime {{MAX_CLIENT_RUNTIME}}
+
+
+
+
+
+
+echo "RESULT-STOPTIME ${EPOCHREALTIME}" | tee -a client.stdout

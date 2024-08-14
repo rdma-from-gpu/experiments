@@ -1,0 +1,30 @@
+#!/bin/bash
+
+echo "RESULT-STARTTIME ${EPOCHREALTIME}" | tee worker.stdout
+
+set -x
+
+# Setup the environment
+PATH="{{ playbook_dir }}/../apps/build:$PATH"
+cd {{ test_dir }}
+
+echo "$$" >> launch_worker.pid
+
+export CUDA_VISIBLE_DEVICES={{hostvars['worker']['vars']['gpu_id']}}
+#timeout --signal=2 {{TIMEOUT}} \
+worker \
+  --workload {{ MODEL }} \
+  --batch {{ BATCH }} \
+  --warmup 10 \
+  --preload false \
+  --gpu-buffer-size {{ BUFFER_SIZE }} \
+  --poll {{POLL}} \
+  --max-runtime {{ MAX_WORKER_RUNTIME }} \
+  --metrics-interval {{ METRICS_INTERVAL }} \
+  --mode {{ MODE }} \
+  --buffer-location {{BUFFER_LOCATION}} \
+  --driver-location {{DATA_LOCATION}} \
+  --copy-mode {{COPY_MODE}} \
+| tee -a worker.stdout
+
+echo "RESULT-STOPTIME ${EPOCHREALTIME}" | tee -a worker.stdout

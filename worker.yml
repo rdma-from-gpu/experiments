@@ -1,0 +1,25 @@
+---
+- hosts:
+  - worker
+  - client
+  gather_facts: false
+
+  vars:
+    # - BATCH: 512
+    # - GPU_BATCH: 4096
+    # - MODES: 
+    #     - standard
+  vars_files:
+    - ./vars/worker.yml
+
+  tasks:
+    - name: Get current test folder
+      ansible.builtin.set_fact:
+        this_test: "{{ lookup('env', 'TS') }}"
+      delegate_to: localhost
+    - name: "Launching test for mode {{ MODE }}"
+      include_tasks: tasks/worker_tasks.yml
+      loop: "{{ MODES }}"
+      loop_control:
+        loop_var: MODE
+
