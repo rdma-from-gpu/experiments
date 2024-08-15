@@ -1,7 +1,11 @@
 #!/bin/bash
 
 set -x
-TESTNAME="worker_modes"
+MODEL=${MODEL:-a100_superresolution_tuned}
+MODEL2=${MODEL//_/-}
+echo $MODEL2
+
+TESTNAME="worker_modes_${MODEL2}"
 mkdir -p results/$TESTNAME/
 
 export TS=$(date --iso-8601=seconds)
@@ -9,8 +13,8 @@ mkdir -p ./tmp/${TS}
 #rm -rf ./tmp/${TS}/*
 
 ansible-playbook -i ./inventory/client-worker.yml ./worker.yml \
-  --extra-vars '{"MODES":["cpu-cpu", "gpu-gpu", "cpu-gpu"]}' $@
-  #--extra-vars '{"MODES":["cpu-cpu","gpu-gpu","cpu-gpu"]}' $@
+  --extra-vars '{"MODES":["cpu-cpu", "gpu-gpu"], "MODEL":"'${MODEL}'"}' $@
+  #--extra-vars '{"MODES":["cpu-cpu", "gpu-gpu", "cpu-gpu"], "MODEL":"'${MODEL}'"}' $@
 
 for f in tmp/${TS}/*; do
   cp worker_modes.yml $f
