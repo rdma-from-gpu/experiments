@@ -9,7 +9,7 @@ mkdir -p ./tmp/${TS}
 #rm -rf ./tmp/${TS}/*
 
 ansible-playbook -i ./inventory/client-worker.yml ./worker.yml \
-  --extra-vars '{"MODES":["cpu-cpu"]}' $@
+  --extra-vars '{"MODES":["cpu-cpu", "gpu-gpu", "cpu-gpu"]}' $@
   #--extra-vars '{"MODES":["cpu-cpu","gpu-gpu","cpu-gpu"]}' $@
 
 for f in tmp/${TS}/*; do

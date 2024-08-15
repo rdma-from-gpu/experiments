@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "RESULT-STARTTIME ${EPOCHREALTIME}" | tee client.stdout
+echo "RESULT-CLIENT_STARTTIME ${EPOCHREALTIME}" | tee client.stdout
 
 set -x
 
@@ -21,11 +21,12 @@ client  \
     --buffer {{BUFFER_SIZE}} \
     --timeout {{CLIENT_TIMEOUT}} \
     --outstanding {{OUTSTANDING}} \
-    --max-runtime {{MAX_CLIENT_RUNTIME}}
+    --max-runtime {{MAX_CLIENT_RUNTIME}} \
+    | tee -a client.stdout
 
 
 
 
 
 
-echo "RESULT-STOPTIME ${EPOCHREALTIME}" | tee -a client.stdout
+echo "RESULT-CLIENT_STOPTIME ${EPOCHREALTIME}" | tee -a client.stdout

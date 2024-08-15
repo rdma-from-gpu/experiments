@@ -107,7 +107,9 @@
     - name: Gently kill worker process
       become: true
       shell: |
-        PARENT=$(cat {{test_dir}}/launch_worker.pid) {{playbook_dir}}/templates/kill_worker.sh
+        python3 {{playbook_dir}}/templates/gently_kill.py --parent $(cat {{test_dir}}/launch_worker.pid)
+        # If the above does not work, we kill brutally all "worker" processes. This may not be a safe solution on a shared system!
+        killall worker | true
 
       delegate_to: worker
       run_once: true
@@ -118,8 +120,8 @@
       become: true
       register: job_result_worker
       until: job_result_worker.finished
-      retries: 10000
-      delay: 5 # check every 5 second
+      retries: 10
+      delay: 1 # check every 5 second
       delegate_to: worker
       run_once: true
 

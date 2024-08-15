@@ -221,6 +221,7 @@ def generate_h5(t, time_precision=1, variables = {}):
         print("You may want to delete the folder.")
         all_results_df = pd.DataFrame()
     else:
+        print(all_results)
         # Transform the variables Series into a DataFrame, and stick the variables 
         all_results_df = add_vars_to_df(pd.DataFrame([all_results]), run_variables)
         # Restore the index to original + all variables
@@ -385,3 +386,53 @@ def parse_testname(path, base):
     # else:
     #     return path.split("/"
     return path
+
+def stacked_plotter(time_results, by="MODE",
+                    elements = ['GPU_RUN_AVG', 'GPU_WAIT_AVG', 'GPU_SEND_AVG'],
+                    rename= {}):
+
+    fig, ax = plt.subplots(1, 1)
+    means=[]
+    stds=[]
+    lowers=[]
+    highers=[]
+    groups=[]
+    for g, gdata in time_results.groupby(by):
+        m=np.array([np.mean(gdata[e]) for e in elements])
+        s=np.array([np.std(gdata[e]) for e in elements])
+        l=np.array([np.quantile(gdata[e],.05) for e in elements])
+        h=np.array([np.quantile(gdata[e],.95) for e in elements])
+        #stats[g] = {"means":means, "stds":stds,  "delta_low":means-lowers, "delta_high":highers-means}
+        groups.append(str(g))
+        means.append(m)
+        stds.append(s)
+        highers.append(h)
+        lowers.append(l)
+        #print(g)
+        #print("MEANS", m)
+        #print("DEVS", s)
+
+    comulatives = np.array([0.0]*len(groups))
+    bottoms = np.array([0.0]*len(groups))
+    for i,e in enumerate(elements):
+        v = [m[i] for m in means]
+        l = [l[i] for l in lowers]
+        h = [h[i] for h in highers]
+        vv = np.array(h)
+        hd = h - vv
+        ld = vv - l
+        #vb=v+bottoms
+        ax.bar(groups,v, bottom=bottoms,
+              #yerr=(ld,hd),
+              label = rename[e] if e in rename else e,
+              zorder=5)
+        #comulatives = comulatives + means[i]
+        bottoms+=v
+
+    labels = [item.get_text() for item in ax.get_xticklabels()]
+    labels = [rename[l] if l in rename else l for l in labels]
+    ax.set_xticklabels(labels)
+
+
+    ax.legend()
+    return fig,ax
