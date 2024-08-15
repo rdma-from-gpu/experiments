@@ -33,14 +33,11 @@ In general, one should run the `run_{test_name}.sh` scripts (that call ansible) 
 These will produce plain text results in `results/{test_name}`, which are then collected by running `plotters/collect_{test_name}.py`.
 This will create an individual `results.h5` file for each run, and then read them back and aggregate the results in a single `results.h5` test for all results.
 
-When using the `_multi` versions of the scripts (e.g. for the generator), the scripts will read a wildcard (e.g. `generator_pktsize_{a100,l40,cpu}`), and place the global results in `generator_pktsize/results.h5`).
-
 These `results.h5` files are then read by `plot_{testname}.py` which would generate the plots as pdfs (typically).
 
-
-When there is a `multi.py` version of the plot scripts, this is intended to be used to collect, and plot, results for multiple _similar_ folders.
 For instance, running `./run_generator_pktsize_a100.sh` and `./run_generator_pktsize_l40.sh` would create two folders `./results/generator_pktsize_{a100,l40}`, each with its own result set.
-The `collect_generator_pktsize_multi.py` script would produce a `./results/generator_pktsize/results.h5` file with all results, which will be then read by `plot_generator_pktsize_multi.py` to generate the plots.
+The `collect_generator_pktsize.py` script would produce a `./results/generator_pktsize/results.h5` file with all results, which will be then read by `plot_generator_pktsize.py` to generate the plots.
+The `--multi` flags needs to be specified in the collect scripts so that it would collect with a wildcard (e.g. for all matching folders)
 
 So, in practice, you want to run the following commands (for the generator plots):
 
@@ -50,7 +47,7 @@ So, in practice, you want to run the following commands (for the generator plots
 ./run_generator_pktsize_a100.sh 
 # Repeat the above for how many "runs" you want
 cd plotters
-python3 ./collect_generator_pktsize_multi.py --multi 
+python3 ./collect_generator_pktsize.py --multi --force
 python3 ./plot_generator_pktsize.py
 ```
 
