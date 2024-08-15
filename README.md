@@ -38,6 +38,23 @@ When using the `_multi` versions of the scripts (e.g. for the generator), the sc
 These `results.h5` files are then read by `plot_{testname}.py` which would generate the plots as pdfs (typically).
 
 
+When there is a `multi.py` version of the plot scripts, this is intended to be used to collect, and plot, results for multiple _similar_ folders.
+For instance, running `./run_generator_pktsize_a100.sh` and `./run_generator_pktsize_l40.sh` would create two folders `./results/generator_pktsize_{a100,l40}`, each with its own result set.
+The `collect_generator_pktsize_multi.py` script would produce a `./results/generator_pktsize/results.h5` file with all results, which will be then read by `plot_generator_pktsize_multi.py` to generate the plots.
+
+So, in practice, you want to run the following commands (for the generator plots):
+
+```
+./run_generator_pktsize_cpu.sh 
+./run_generator_pktsize_l40.sh 
+./run_generator_pktsize_a100.sh 
+# Repeat the above for how many "runs" you want
+cd plotters
+python3 ./collect_generator_pktsize_multi.py --multi 
+python3 ./plot_generator_pktsize.py
+```
+
+
 ## Disclaimer
 
 The original plots published in the EdgeSys 24 paper where obtained with a more complex and hack-ish setup based on NPF.
