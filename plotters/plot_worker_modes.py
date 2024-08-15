@@ -47,7 +47,6 @@ plt.rcParams['ps.fonttype'] = 42
 time_results = kind_results["TIME"]
 gpu_results = kind_results["GPU"]
 
-
 # Remove bad runs
 gpu_results = gpu_results[gpu_results["GPU_COPY_INPUT_AVG"] < 1e8]
 gpu_results = gpu_results[gpu_results["GPU_COPY_OUTPUT_AVG"] < 1e8]
@@ -93,11 +92,11 @@ res = res[res["MODE"] != "cpu-gpu"]
 
 
 # The paper plot
-res1 = res[res["MODEL"] == "a100_superresolution_tuned"]
+res1 = res[res["MODEL"] == "a100_superresolution_1_tuned"]
 fig, ax = stacked_plotter(res1, elements=elements, rename=rename)
 format_time_plot(ax, ylabel="Time (ms)", div=1e6, log=False, stop=4e3, start=1)
 # format_pktsize_plot(ax)
-ax.set_ylim(0,1.5e6)
+ax.set_ylim(1e6,3.5e6)
 fig.tight_layout()
 fig.savefig(output_path + "/worker_stacked_latencies.pdf")
 
