@@ -202,6 +202,7 @@ def generate_h5(t, time_precision=1, variables = {}):
     #run_variables_df = pd.Series(run_variables)
 
 
+    print("Variables:",run_variables)
     all_results = [r for r in all_results if len(r)]
     all_results = pd.concat(all_results)
     # First we solve the NaN for all missing values, joining rows

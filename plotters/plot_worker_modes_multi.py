@@ -86,19 +86,33 @@ rename = {
     }
 
 
-# print(list(gpu_results["GPU_COPY_INPUT_AVG"]))
-# from IPython import embed
-# embed()
-
 res = gpu_results.reset_index()
 res = res[res["MODE"] != "cpu-gpu"]
-fig, ax = stacked_plotter(res, elements=elements, rename=rename)
 
 
+# The paper plot
+res1 = res[res["MODEL"] == "a100_superresolution_tuned"]
+fig, ax = stacked_plotter(res1, elements=elements, rename=rename)
 format_time_plot(ax, ylabel="Time (ms)", div=1e6, log=False, stop=4e3, start=1)
 # format_pktsize_plot(ax)
 ax.set_ylim(0,1.5e6)
 fig.tight_layout()
 fig.savefig(output_path + "/worker_stacked_latencies.pdf")
 
+# A plot for each model
+res1 = res[res["MODE"] == "cpu-cpu"]
+fig, ax = stacked_plotter(res1, elements=elements, rename=rename, by="MODEL")
+format_time_plot(ax, ylabel="Time (ms)", div=1e6, log=False, stop=4e3, start=1)
+# format_pktsize_plot(ax)
+ax.set_ylim(0,1.5e6)
+fig.tight_layout()
+fig.savefig(output_path + "/worker_stacked_latencies_cpu-cpu_models.pdf")
 
+
+res1 = res[res["MODE"] == "gpu-gpu"]
+fig, ax = stacked_plotter(res1, elements=elements, rename=rename, by="MODEL")
+format_time_plot(ax, ylabel="Time (ms)", div=1e6, log=False, stop=4e3, start=1)
+# format_pktsize_plot(ax)
+ax.set_ylim(0,1.5e6)
+fig.tight_layout()
+fig.savefig(output_path + "/worker_stacked_latencies_gpu-gpu_models.pdf")

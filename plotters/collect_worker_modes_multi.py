@@ -38,7 +38,7 @@ if __name__ == "__main__":
             print("Processing results for", t["full_path"])
             try:
                 generate_h5(t, args.time_precision,
-                            {"MODE":"--mode", "WRITE_SIZE": "--model"})
+                            {"MODE":"--mode", "MODEL": "--model", "MODEL": "--workload"})
             except Exception as ex:
                 print("Error while processing", t["full_path"])
                 traceback.print_exc()

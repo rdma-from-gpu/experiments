@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 
+# USE THE _multi VARIANT INSTEAD OF THIS FILE!
+# THIS WOULD COLLECT A SINGLE FOLDER!
+
+
 import glob
 import os 
 from pathlib import Path
