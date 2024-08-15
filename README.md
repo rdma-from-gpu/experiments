@@ -7,17 +7,6 @@
     ansible-playbook -i ./inventory/t4.yml ./setup.yml
     ```
 
-# How to
-
-In general, one just want to run `bash run_*.sh`, and then check the results in `results/*`.
-Here there will a folder test name, and for each a time-stamped folder that contains all output and logs for each run
-
-# Post processing and plotting
-
-The files in `post-processing` will parse thee outputs and build a Hickle dataframe for each test.
-These will then be read by other scripts to generate the plots for each different experiment.
-
-
 # Dependencies
 
 Tests are run with ansible, and a standard deployment where you can run `sudo` without password and you can login with ssh keys should be enough.
@@ -26,7 +15,16 @@ To generate the plots, some Python packages are needed.
 For these it should be enough to create a new environment with Conda starting from `requirements.txt`.
 Note this cannot be done with `virtualenv` due to Pandas dependency on PyTables, which is somewhat limiting when installed via plain pip.
 
-# The process
+# How to
+
+In general, one just want to run `bash run_*.sh`, and then check the results in `results/*`.
+Here there will a folder test name, and for each a time-stamped folder that contains all output and logs for each run
+
+The files in `plotters` will parse thee outputs and build a Hickle dataframe for each test.
+These will then be read by other scripts to generate the plots for each different experiment.
+
+
+# The process with more details
 
 In general, one should run the `run_{test_name}.sh` scripts (that call ansible) to run the tests.
 
@@ -52,13 +50,17 @@ python3 ./plot_generator_pktsize.py
 ```
 
 
-## Disclaimer
+# Caveat Emptor
 
 The original plots published in the EdgeSys 24 paper where obtained with a more complex and hack-ish setup based on NPF.
 The tests contained in this folder aim to replicate the same plots with a leaner and more standardized software stack, but there is no willing to re-create the exact same plots as in the paper (e.g. proportions, labels, axis, ...).
 So you can expect these plots to appear somewhat different than the published figures.
 
+However, the code published in this repositories is the exact same code used when running the experiments reported in the EdgeSys paper, with only minor modifications to reshape the code in a more re-usable way.
+No relevant performance differences addressable to these changes have been measured between the original and the released versions.
+
 Also note the hardware setup changed after the original paper, so some results (especially CPU-related) could be slightly different, or instable w.r.t. the original ones. However, further tweaking of parameters (e.g. batch sizes and sleep intervals) should fix these differences.
+
 
 # LICENSE
 
