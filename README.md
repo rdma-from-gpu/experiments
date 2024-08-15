@@ -59,3 +59,9 @@ The tests contained in this folder aim to replicate the same plots with a leaner
 So you can expect these plots to appear somewhat different than the published figures.
 
 Also note the hardware setup changed after the original paper, so some results (especially CPU-related) could be slightly different, or instable w.r.t. the original ones. However, further tweaking of parameters (e.g. batch sizes and sleep intervals) should fix these differences.
+
+# LICENSE
+
+(C) 2024 Massimo Girondi  girondi@kth.se GNU GPL v3
+
+See [LICENSE](LICENSE).
