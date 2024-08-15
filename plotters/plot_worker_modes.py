@@ -1,3 +1,7 @@
+#!/usr/bin/python3
+
+# (C) 2024 Massimo Girondi girondi@kth.se GNU GPL v3
+
 import pandas as pd
 import glob
 import os
@@ -42,8 +46,6 @@ plt.rcParams['ps.fonttype'] = 42
 
 time_results = kind_results["TIME"]
 gpu_results = kind_results["GPU"]
-
-print(time_results.columns)
 
 
 # Remove bad runs

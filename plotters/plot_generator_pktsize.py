@@ -1,3 +1,7 @@
+#!/usr/bin/python3
+
+# (C) 2024 Massimo Girondi girondi@kth.se GNU GPL v3
+
 import pandas as pd
 import glob
 import os
@@ -17,7 +21,7 @@ output_path  = os.path.abspath(Path(file_path)/ ".." / "results"/"generator_pkts
 
 parser = argparse.ArgumentParser(
 
-                description='Generate plots')
+    description='Generate plots')
 parser.add_argument("--input", default=str(results_path_h5),
                     help="results.h5 output to load")
 parser.add_argument("--output", default=str(output_path),

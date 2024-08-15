@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# (C) 2024 Massimo Girondi girondi@kth.se GNU GPL v3
+
 import glob
 import os 
 from pathlib import Path
@@ -17,7 +19,7 @@ if __name__ == "__main__":
     results_path = os.path.abspath(Path(file_path)/ ".." / "results" / "generator_pktsize")
 
     parser = argparse.ArgumentParser(
-            description='Look for results, and convert them to h5. Multi GPU version.')
+        description='Look for results, and convert them to h5. Multi GPU version.')
     parser.add_argument("--force", action="store_true", help="Ignore last-modified date, always re-generate h5 files")
     parser.add_argument("--time-precision", type=int, help="Time precision to round results. If more results fall in the same 'slot', only average will be kept. Express it in fraction of seconds (e.g. 1 for 1 sample/sec, 10 for 10 samples/sec.. ", default=1)
     parser.add_argument("--path", default=str(results_path),

@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# (C) 2024 Massimo Girondi girondi@kth.se GNU GPL v3
+
 import glob
 import os 
 from pathlib import Path
