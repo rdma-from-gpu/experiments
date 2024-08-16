@@ -1,3 +1,14 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13332403.svg)](https://doi.org/10.5281/zenodo.13332403)
+
+
+
+
+This folder provides some scripts and tools to reproduce the figures and measurements of our paper.
+These are based on Ansible, and requires some machines running Ubuntu, with NVIDIA GPUs and NVIDIA Mellanox NICs.
+
+
+
+
 # Assumptions
 - There is a shared NFS (or equivalent) storage, such that the main `rdma-from-gpu` folder (or at least the experiment folder) is shared among all nodes involved in the tests
 - You have passwordless `sudo` and a public key for login to these nodes
