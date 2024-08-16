@@ -1,0 +1,22 @@
+---
+- hosts:
+  - worker
+  - client
+  gather_facts: false
+
+  vars:
+  vars_files:
+    - ./vars/worker.yml
+
+  tasks:
+    - name: Get current test folder
+      ansible.builtin.set_fact:
+        this_test: "{{ lookup('env', 'TS') }}"
+      delegate_to: localhost
+    - name: "Launching test for concurrency {{ CONCURRENCY }}"
+      include_tasks: tasks/profiler_tasks.yml
+        #loop: "{{ range(1, 16) | list }}"
+      loop: "{{ range(1, 17) | list }}"
+      loop_control:
+        loop_var: CONCURRENCY
+

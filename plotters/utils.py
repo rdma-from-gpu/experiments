@@ -222,16 +222,29 @@ def generate_h5(t, time_precision=1, variables = {}):
         print("You may want to delete the folder.")
         all_results_df = pd.DataFrame()
     else:
-        print(all_results)
         # Transform the variables Series into a DataFrame, and stick the variables 
         all_results_df = add_vars_to_df(pd.DataFrame([all_results]), run_variables)
         # Restore the index to original + all variables
         all_results_df = all_results_df.set_index(list(run_variables.keys()))
 
+
+    if os.path.exists(f"{t['full_path']}/times.txt"):
+        print("Collecting times from times.txt")
+        with open(f"{t['full_path']}/times.txt") as f:
+            times = [int(l) for l in f.readlines()]
+        #times_df = add_vars_to_df(pd.DataFrame([[times]]), run_variables)
+    else:
+        times = []
+    times_df = pd.DataFrame([[times]], columns = ["times"])
+    times_df = add_vars_to_df(times_df, run_variables)
+
+    print("You can ignore hdf errors below... But you can fix this!")
     results_store = pd.HDFStore(f"{t[r'full_path']}/results.h5","w")
     results_store.put("results", all_results_df)
     results_store.put("keys", pd.Series(all_kind_results.keys()))
     #results_store.put("variables", pd.Series(run_variables))#.convert_dtypes())
+    results_store.put("times", times_df)
+
 
     for k, r in all_kind_results.items():
         results_store.put(k, r)
@@ -241,7 +254,7 @@ def generate_h5(t, time_precision=1, variables = {}):
     return
 
 
-def read_h5(path):
+def read_h5(path, times=False):
     keys = list(pd.read_hdf(path, "keys"))
     #variables = pd.read_hdf(path, "variables")
     results = pd.read_hdf(path, "results")
@@ -249,9 +262,13 @@ def read_h5(path):
     for k in keys:
         kind_results[k] = pd.read_hdf(path, k)
 
-    return results, kind_results #, variables
+    if times:
+        times = pd.read_hdf(path, "times")
+        return results, kind_results, times
+    else:
+        return results, kind_results
 
-def join_results(results, kind_results):
+def join_results(results, kind_results, times):
     all_results = pd.concat(results)
     all_kr = {}
 
@@ -262,8 +279,11 @@ def join_results(results, kind_results):
 
     all_kr = {k: pd.concat(r) for k,r in all_kr.items()}
 
-
-    return all_results, all_kr
+    if times:
+        all_times = pd.concat(times)
+        return all_results, all_kr, all_times
+    else:
+        return all_results, all_kr
 
 
 
@@ -437,3 +457,52 @@ def stacked_plotter(time_results, by="MODE",
 
     ax.legend()
     return fig,ax
+
+
+def generate_h5_times(t, variables = {}):
+    # Generate a run-specific h5 file. Joined later
+    times = []
+
+    run_variables = extract_variables(t["full_path"], variables)
+    run_variables["run"] = str(Path(t["full_path"]).name)
+    run_variables["testname"] = str(Path(t["testname"]))
+    run_variables_df = pd.Series(run_variables)
+
+    #print("Variables:",run_variables)
+    #all_results = [r for r in all_results if len(r)]
+    #all_results = pd.concat(all_results)
+    ## First we solve the NaN for all missing values, joining rows
+    #all_kind_results = {k:join_timestamps(pd.concat(r), k) for k,r in all_kind_results.items()}
+    ## Then we stick the variables together
+    #all_kind_results = {k:add_vars_to_df(r, run_variables) for k,r in all_kind_results.items()}
+    #{k:r.index.rename(k) for k, r in  all_kind_results.items()}
+    ## # and restore the index
+    #all_kind_results = {k:r.reset_index().set_index(list(run_variables.keys())) for k,r in all_kind_results.items()}
+
+    ## Just a safety check, if the columns do not exist, skip setting them as index.
+    ## The DF is probably empty!
+    ## This should raise a bigger error, but for now we just ask the user to delete the broken test folder
+    ## THIS MEANS ONE NEEDS TO HAVE ALWAYS A RESULT!
+    #if len(all_results) == 0:
+    #    print(f"Error while processing test {t['full_path']}: no RESULT found!")
+    #    print("You may want to delete the folder.")
+    #    all_results_df = pd.DataFrame()
+    #else:
+    #    print(all_results)
+    #    # Transform the variables Series into a DataFrame, and stick the variables 
+    #    all_results_df = add_vars_to_df(pd.DataFrame([all_results]), run_variables)
+    #    # Restore the index to original + all variables
+    #    all_results_df = all_results_df.set_index(list(run_variables.keys()))
+
+    #results_store = pd.HDFStore(f"{t[r'full_path']}/results.h5","w")
+    #results_store.put("results", all_results_df)
+    #results_store.put("keys", pd.Series(all_kind_results.keys()))
+    ##results_store.put("variables", pd.Series(run_variables))#.convert_dtypes())
+
+    #for k, r in all_kind_results.items():
+    #    results_store.put(k, r)
+
+    #results_store.close()
+
+    #return
+

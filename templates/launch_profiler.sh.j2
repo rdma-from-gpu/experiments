@@ -1,0 +1,34 @@
+#!/bin/bash
+
+echo "RESULT-STARTTIME ${EPOCHREALTIME}" | tee profiler.stdout
+
+CPU_LIST={{CPU_LIST}}
+
+if [ -n "${CPU_LIST}" ]; then
+  TASKSET="taskset --all --cpu-list ${CPU_LIST}"
+fi
+
+set -x
+
+# Setup the environment
+PATH="{{ playbook_dir }}/../apps/build:$PATH"
+cd {{ test_dir }}
+
+echo "$$" >> launch_worker.pid
+
+export CUDA_VISIBLE_DEVICES={{hostvars['worker']['vars']['gpu_id']}}
+#timeout --signal=2 {{TIMEOUT}} \
+
+${TASKSET} \
+worker \
+  --workload {{ MODEL }} \
+  --warmup 1000 \
+  --gpu-buffer-size {{ BUFFER_SIZE }} \
+  --profile 3 \
+  --profile-concurrency {{CONCURRENCY}} \
+  --poll {{POLL}} \
+  --max-runtime {{ MAX_WORKER_RUNTIME }} \
+  --max-inferences 500000 \
+| tee -a profiler.stdout
+
+echo "RESULT-STOPTIME ${EPOCHREALTIME}" | tee -a profiler.stdout
