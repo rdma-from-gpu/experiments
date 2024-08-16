@@ -41,7 +41,7 @@ For instance, running `./run_generator_pktsize_a100.sh` and `./run_generator_pkt
 The `collect_generator_pktsize.py` script would produce a `./results/generator_pktsize/results.h5` file with all results, which will be then read by `plot_generator_pktsize.py` to generate the plots.
 The `--multi` flags needs to be specified in the collect scripts so that it would collect with a wildcard (e.g. for all matching folders)
 
-So, in practice, you want to run the following commands (for the generator plots):
+So, in practice, you want to run the following commands (e.g. for the generator plots):
 
 ```
 ./run_generator_pktsize_cpu.sh 
@@ -67,6 +67,54 @@ No relevant performance differences addressable to these changes have been measu
 
 Also note the hardware setup changed after the original paper, so some results (especially CPU-related) could be slightly different, or instable w.r.t. the original ones. However, further tweaking of parameters (e.g. batch sizes and sleep intervals) should fix these differences.
 
+# Reproduce paper's figures
+
+The paper figures can be reproduced with the following commands:
+
+## Figure 2: inference time distribution vs concurrency
+![Figure 2](results/profiler_concurrency/plots/profiler_concurrency_cdf_a100_squeezenet_tuned.pdf)
+
+```
+bash ./run_profiler_concurrency.sh
+cd plotters
+python3 ./collect_profiler_concurrency.py --multi
+python3 ./plot_profiler_concurrency.py
+```
+
+
+## Figure 4 & 5: Throughput and post time vs packet size
+![Figure 4](results/generator_pktsize/plots/generator_pktsize_mode_rx_bps.pdf)
+![Figure 5](results/generator_pktsize/plots/generator_pktsize_mode_avg_send.pdf)
+
+```
+bash ./run_generator_pktsize_a100.sh
+bash ./run_generator_pktsize_l40.sh
+bash ./run_generator_pktsize_cpu.sh
+
+cd plotters
+python3 ./collect_generator_pktsize.py --multi
+python3 ./plot_generator_pktsize.py
+```
+
+## Figure 6: GPU vs CPU stacked latencies
+![Figure 6](results/worker_modes/plots/worker_stacked_latencies.pdf)
+
+```
+bash ./run_worker_modes.sh
+cd plotters
+python3 ./collect_worker_modes.py --multi
+python3 ./plot_worker_modes.py
+```
+
+## Figure 7: CPU usage vs polling mechanism
+![Figure 7](results/worker_poll/plots/worker_cpu_poll.pdf)
+
+```
+bash ./run_worker_poll.sh
+cd plotters
+python3 ./collect_worker_poll.py --multi
+python3 ./plot_worker_poll.py
+```
 
 # LICENSE
 
