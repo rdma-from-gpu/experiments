@@ -13,7 +13,7 @@ mkdir -p ./tmp/${TS}
 #rm -rf ./tmp/${TS}/*
 
 ansible-playbook -i ./inventory/a100.yml ./profiler_concurrency.yml \
-  --extra-vars '"MODEL":"'${MODEL}'"}' $@
+  --extra-vars '{"MODEL":"'${MODEL}'"}' $@
   #--extra-vars '{"MODES":["cpu-cpu", "gpu-gpu", "cpu-gpu"], "MODEL":"'${MODEL}'"}' $@
 
 for f in tmp/${TS}/*; do

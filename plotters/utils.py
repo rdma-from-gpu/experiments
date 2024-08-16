@@ -233,6 +233,7 @@ def generate_h5(t, time_precision=1, variables = {}):
         with open(f"{t['full_path']}/times.txt") as f:
             times = [int(l) for l in f.readlines()]
         #times_df = add_vars_to_df(pd.DataFrame([[times]]), run_variables)
+        print("There are", len(times), "times")
     else:
         times = []
     times_df = pd.DataFrame([[times]], columns = ["times"])
