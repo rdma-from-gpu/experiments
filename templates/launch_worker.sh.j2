@@ -2,6 +2,12 @@
 
 echo "RESULT-STARTTIME ${EPOCHREALTIME}" | tee worker.stdout
 
+CPU_LIST={{CPU_LIST}}
+
+if [ -n "${CPU_LIST}" ]; then
+  TASKSET="taskset --all --cpu-list ${CPU_LIST}"
+fi
+
 set -x
 
 # Setup the environment
@@ -12,6 +18,8 @@ echo "$$" >> launch_worker.pid
 
 export CUDA_VISIBLE_DEVICES={{hostvars['worker']['vars']['gpu_id']}}
 #timeout --signal=2 {{TIMEOUT}} \
+
+${TASKSET} \
 worker \
   --workload {{ MODEL }} \
   --batch {{ BATCH }} \

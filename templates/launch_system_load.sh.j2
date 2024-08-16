@@ -7,11 +7,17 @@ cd {{ test_dir }}
 
 echo "$$" >> launch_measure_system_load.pid
 
+if [[ -n "{{CPU_LIST}}" ]]; then
+  CORES={{CPU_LIST}}
+else
+  CORES={{ hostvars[inventory_hostname]['vars']['gpu_cores']  }} 
+fi
+
 timeout 180 \
 unbuffer python3 {{ playbook_dir }}/../helpers/system_load.py \
   --name "{{ inventory_hostname }}" \
   --load \
   --interrupts \
-  --cores {{ hostvars[inventory_hostname]['vars']['gpu_cores']  }} \
+  --cores $CORES \
   --power \
   | tee system_load.stdout

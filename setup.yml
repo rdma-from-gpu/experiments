@@ -45,8 +45,13 @@
       nvidia-smi -i {{hostvars['worker']['vars']['gpu_id']}} --lock-memory-clocks=${MCLOCK},${MCLOCK}
 
 
-
-
-
+  - name: get Python packages
+    pip:
+      name:
+        - python-sensors
+        - pysensors
+        - numa
+        - psutil
+        - ansible # Well...
 
 

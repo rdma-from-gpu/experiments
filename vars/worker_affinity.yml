@@ -1,0 +1,2 @@
+# These have been isolated via isolcpus
+CPU_LIST: 20-23,68-71

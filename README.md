@@ -1,11 +1,15 @@
 # Assumptions
-- There is a shared NFS storage, such that the main `rdma-from-gpu` folder (or at least the experiment folder) is shared among all nodes involved in the tests
+- There is a shared NFS (or equivalent) storage, such that the main `rdma-from-gpu` folder (or at least the experiment folder) is shared among all nodes involved in the tests
 - You have passwordless `sudo` and a public key for login to these nodes
 - You have `nvidia_peermem` and correct rdma-core setup.
   In most cases, running the `setup.yml` playbook should prepare the environment well-enough:
     ```
     ansible-playbook -i ./inventory/t4.yml ./setup.yml
     ```
+
+- The `inventory/*` files would map to your actual setup of clients and servers. You'd need at least a machine with 2 sockets and 2 independent NICs on different NUMAs to replicate most of the experiments, although these have been done with two separate machines to avoid any conflict.
+- The experiments (and the whole programs compilations) have been tested under Ubuntu 22.04 LTS, with standard libraries obtained from the usual sources.
+
 
 # Dependencies
 
